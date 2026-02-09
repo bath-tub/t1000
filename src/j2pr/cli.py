@@ -503,7 +503,16 @@ def run(
             pr_title = f"[{jira_key}] {title}"
             pr_body = _pr_body(agent_result.footer, test_command)
 
-            run_command(["git", "push", "-u", "origin", branch], cwd=repo_path)
+            # Force-push because we always recreate the branch from a clean
+            # base — any previous remote state is stale.  Check the return
+            # code so we don't silently continue if the push fails.
+            push_result = run_command(
+                ["git", "push", "--force-with-lease", "-u", "origin", branch],
+                cwd=repo_path,
+            )
+            cap.event("push_finished", {"returncode": push_result.returncode})
+            if push_result.returncode != 0:
+                raise RuntimeError(f"Git push failed: {push_result.stderr.strip()}")
 
             if config.github.use_gh_cli:
                 ensure_gh()
