@@ -1,0 +1,9 @@
+---
+description: Jira integration conventions
+globs: src/j2pr/jira.py
+alwaysApply: false
+---
+
+# Jira Integration Rules
+
+- Jira is source-of-truth for tickets; use JQL from config.

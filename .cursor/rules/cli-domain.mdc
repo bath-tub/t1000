@@ -1,0 +1,12 @@
+---
+description: CLI behavior and UX conventions
+globs: src/j2pr/cli.py
+alwaysApply: false
+---
+
+# CLI Domain Rules
+
+- Commands live in `src/j2pr/cli.py` and must preserve existing CLI surface area.
+- Use Typer options/args with explicit exit codes: `0` success, `2` needs-human, `3` failed.
+- Outputs should be concise; prefer Rich tables for lists, JSON for `--json`.
+- Keep `scan`, `run`, `run-next`, `status`, `open`, `tail`, `config validate` behavior stable.

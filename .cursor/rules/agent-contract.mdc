@@ -1,0 +1,12 @@
+---
+description: Cursor agent contract and prompt requirements
+globs: src/j2pr/agent.py
+alwaysApply: false
+---
+
+# Agent Contract Rules
+
+- Always include the required footer: `J2PR_RESULT: {...json...}`.
+- If footer is missing/invalid, mark run `NEEDS_HUMAN`.
+- Prompt must include guardrails, repo path, base branch, and test command.
+- Agent never opens/merges PR unless explicitly enabled.

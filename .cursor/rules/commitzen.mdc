@@ -1,0 +1,19 @@
+---
+description: Commitzen commit message format
+alwaysApply: true
+---
+
+# Commitzen Format
+
+Use this commit format for every commit in this repo:
+
+`<domain>(<goal>): <summary>`
+
+- `domain` = area of intent (e.g., `core`, `tests`, `docs`, `config`, `rules`, `meta`)
+- `goal` = short purpose phrase (e.g., `bootstrap`, `harden`, `document`, `refine`)
+- `summary` = imperative, concise description of the change
+
+Examples:
+- `docs(document): add agent commit guidance`
+- `core(bootstrap): add Jira scanning pipeline`
+- `tests(bootstrap): add guardrails unit coverage`

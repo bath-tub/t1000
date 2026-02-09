@@ -1,0 +1,12 @@
+---
+description: Guardrails and quality gates
+globs: src/j2pr/guardrails.py
+alwaysApply: false
+---
+
+# Guardrails Rules
+
+- Enforce deny-globs and diff limits outside the agent.
+- Do not allow changes to `.github/workflows/**`, infra, or migrations by default.
+- Tests required by default; one automated fix cycle max.
+- `command_denylist` must be checked for orchestrator-run commands.

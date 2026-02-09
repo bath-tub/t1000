@@ -1,0 +1,11 @@
+---
+description: GitHub integration conventions
+globs: src/j2pr/github.py
+alwaysApply: false
+---
+
+# GitHub Integration Rules
+
+- Prefer `gh` CLI; REST requires a GitHub token.
+- PR title must be `[JIRAKEY] <title>` and Draft by default.
+- Never merge PRs.

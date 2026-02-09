@@ -1,0 +1,15 @@
+---
+description: Ensure agents read and update agents.md
+globs: **/*
+alwaysApply: false
+---
+
+# Agents Guide Requirement
+
+- Always read `agents.md` before starting work.
+- If you get stuck or discover important context, update `agents.md` with:
+  - what failed,
+  - where to find artifacts/logs,
+  - the resolution or workaround.
+- If you are working in a specific domain, also update the matching domain rule with any new guidance.
+- Keep entries concise and actionable for future agents.

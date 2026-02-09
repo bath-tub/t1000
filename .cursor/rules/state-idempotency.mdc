@@ -1,0 +1,12 @@
+---
+description: State and idempotency requirements
+globs: src/j2pr/state.py
+alwaysApply: false
+---
+
+# State & Idempotency Rules
+
+- Use `state.py` helpers; do not bypass SQLite state updates.
+- If a ticket already has `PR_OPENED` with a PR URL, return it unless `--rerun`.
+- Always update `tickets` and `runs` consistently on success/failure.
+- Locks are per-repo; release locks on any exit path.
