@@ -1,0 +1,43 @@
+jira:
+  base_url: "https://your-domain.atlassian.net"
+  email: "you@example.com"
+  api_token: "${JIRA_API_TOKEN}"
+  jql: 'project = PAYAD AND status = "To Do"'
+  fields: ["summary", "description", "status", "components"]
+  comment_on_pr: true
+  label_running: "j2pr-running"
+  label_done: "j2pr-done"
+  label_failed: "j2pr-failed"
+
+github:
+  owner: "your-org"
+  default_base_branch: "main"
+  use_gh_cli: true
+  draft_pr: true
+  token: "${GITHUB_TOKEN}"
+  reviewers: []
+  labels: []
+
+workspace:
+  root_dir: "/path/to/workspaces"
+  repo_allowlist: ["your-repo"]
+  repo_mapping:
+    project: "your-repo"
+  single_repo_only: true
+
+guardrails:
+  deny_globs: [".github/workflows/**", "**/*.tf", "k8s/**", "migrations/**"]
+  command_denylist: ["rm -rf", "mkfs", ":(){:|:&};:"]
+  max_files_changed: 40
+  max_diff_lines: 2000
+  require_clean_worktree: true
+  require_tests: true
+  test_command: "pytest"
+  format_command: ""
+  max_fix_attempts: 1
+
+cursor:
+  command: "cursor-agent"
+  model: ""
+  timeout_minutes: 45
+  prompt_template_path: ""
