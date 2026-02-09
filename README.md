@@ -11,7 +11,7 @@ Local CLI that turns eligible Jira tickets into Draft PR links using a headless 
    - `cp config.example.yaml ~/.j2pr/config.yaml`
 3. Set env vars for secrets referenced in config.
 4. Run:
-   - `j2pr config validate`
+   - `j2pr config-validate`
    - `j2pr scan`
    - `j2pr run-next`
 

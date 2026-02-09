@@ -39,7 +39,7 @@ This tool is intended to be used daily by me and potentially teammates.
   - `run` (pick ticket and execute end-to-end),
   - `status` (show state + latest runs),
   - `open` (open/tail artifacts for a ticket/run),
-  - `config validate`.
+  - `config-validate`.
 - One-worker execution (with per-repo lock).
 - PR creation to GitHub (via API or `gh` CLI).
 - Jira read + comment (comment optional but supported).
@@ -302,7 +302,7 @@ Never merge.
 Command group: `j2pr`
 
 ### Commands
-- `j2pr config validate`
+- `j2pr config-validate`
 - `j2pr scan [--limit N] [--json]`
 - `j2pr run <JIRAKEY> [--rerun] [--no-comment] [--force]`
 - `j2pr run-next` (takes oldest eligible, runs it)
