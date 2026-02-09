@@ -70,7 +70,7 @@ def run_agent(
     prompt = prompt_template.format(**prompt_vars)
 
     proc = subprocess.run(
-        [command, "--prompt", prompt],
+        [command, "--print", prompt],
         cwd=str(repo_path),
         capture_output=True,
         text=True,
