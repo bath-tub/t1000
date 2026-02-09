@@ -16,6 +16,20 @@ def ensure_clean_worktree(cwd: Path) -> Tuple[bool, str]:
     return (status == ""), status
 
 
+def detect_default_branch(cwd: Path) -> str | None:
+    """Ask the remote which branch HEAD points to (e.g. main, develop, master)."""
+    result = run_command(["git", "symbolic-ref", "refs/remotes/origin/HEAD"], cwd=cwd)
+    ref = result.stdout.strip()          # e.g. refs/remotes/origin/develop
+    if ref:
+        return ref.split("/")[-1]
+    # symbolic-ref can be unset; fall back to `git remote show origin`
+    result = run_command(["git", "remote", "show", "origin"], cwd=cwd)
+    for line in result.stdout.splitlines():
+        if "HEAD branch" in line:
+            return line.split(":")[-1].strip()
+    return None
+
+
 def fetch_and_checkout_base(cwd: Path, base_branch: str) -> None:
     run_command(["git", "fetch", "--all"], cwd=cwd)
     run_command(["git", "checkout", base_branch], cwd=cwd)
@@ -46,6 +60,25 @@ def diff_numstat(cwd: Path) -> List[Tuple[int, int, str]]:
 def diff_patch(cwd: Path) -> str:
     result = run_command(["git", "diff"], cwd=cwd)
     return result.stdout
+
+
+def detect_test_command(cwd: Path) -> str | None:
+    """Auto-detect the test command for a repo by inspecting build files.
+
+    Returns a shell command string, or ``None`` if nothing recognised is found.
+
+    Detection order (first match wins):
+      1. package.json  → ``npm test``
+      2. build.gradle / build.gradle.kts  → ``./gradlew test``
+      3. pom.xml  → ``mvn test``
+    """
+    if (cwd / "package.json").exists():
+        return "npm test"
+    if (cwd / "build.gradle").exists() or (cwd / "build.gradle.kts").exists():
+        return "./gradlew test"
+    if (cwd / "pom.xml").exists():
+        return "mvn test"
+    return None
 
 
 def remote_branch_exists(cwd: Path, branch: str) -> bool:
