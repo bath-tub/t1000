@@ -507,7 +507,7 @@ def run(
             # base — any previous remote state is stale.  Check the return
             # code so we don't silently continue if the push fails.
             push_result = run_command(
-                ["git", "push", "--force-with-lease", "-u", "origin", branch],
+                ["git", "push", "--force", "-u", "origin", branch],
                 cwd=repo_path,
             )
             cap.event("push_finished", {"returncode": push_result.returncode})
