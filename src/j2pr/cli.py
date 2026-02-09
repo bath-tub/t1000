@@ -450,11 +450,13 @@ def run(
             )
 
             # Stage and commit the agent's changes so they can be pushed.
+            # Use --no-verify to bypass target repo pre-commit hooks (e.g.
+            # husky/lint-staged) — our own guardrails already validated the diff.
             cap.event("commit_started")
             run_command(["git", "add", "-A"], cwd=repo_path)
             commit_msg = f"[{jira_key}] {title}"
             commit_result = run_command(
-                ["git", "commit", "-m", commit_msg, "--allow-empty-message"],
+                ["git", "commit", "-m", commit_msg, "--no-verify"],
                 cwd=repo_path,
             )
             cap.event("commit_finished", {"returncode": commit_result.returncode})
