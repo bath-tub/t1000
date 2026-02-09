@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import signal
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -69,15 +71,35 @@ def run_agent(
         prompt_template = DEFAULT_PROMPT
     prompt = prompt_template.format(**prompt_vars)
 
-    proc = subprocess.run(
+    # Use Popen + communicate so we can reliably kill the entire process
+    # group on timeout.  subprocess.run's built-in timeout can hang when
+    # grandchild processes hold stdout/stderr pipes open.
+    proc = subprocess.Popen(
         [command, "--print", prompt],
         cwd=str(repo_path),
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        timeout=timeout_minutes * 60,
+        start_new_session=True,  # new process group for clean kill
     )
-    transcript = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    timed_out = False
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout_minutes * 60)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        # Kill entire process group so grandchild processes don't linger.
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+        except OSError:
+            proc.kill()
+        stdout, stderr = proc.communicate(timeout=30)
+
+    transcript = (stdout or "") + "\n" + (stderr or "")
     transcript_path.write_text(transcript)
+
+    if timed_out:
+        return AgentResult(-1, None, transcript)
+
     footer = None
     for line in reversed(transcript.splitlines()):
         parsed = parse_footer(line.strip())
