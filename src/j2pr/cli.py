@@ -449,6 +449,18 @@ def run(
                 },
             )
 
+            # Stage and commit the agent's changes so they can be pushed.
+            cap.event("commit_started")
+            run_command(["git", "add", "-A"], cwd=repo_path)
+            commit_msg = f"[{jira_key}] {title}"
+            commit_result = run_command(
+                ["git", "commit", "-m", commit_msg, "--allow-empty-message"],
+                cwd=repo_path,
+            )
+            cap.event("commit_finished", {"returncode": commit_result.returncode})
+            if commit_result.returncode != 0:
+                raise RuntimeError(f"Git commit failed: {commit_result.stderr.strip()}")
+
             cap.event("pr_lookup_started")
             if remote_branch_exists(repo_path, branch):
                 if config.github.use_gh_cli:
