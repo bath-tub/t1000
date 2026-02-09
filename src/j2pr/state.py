@@ -203,3 +203,28 @@ def get_lock(repo: str) -> Optional[str]:
     row = cur.fetchone()
     conn.close()
     return row["run_id"] if row else None
+
+
+def clear_all_locks() -> int:
+    """Delete every row in the locks table. Returns count of rows removed."""
+    conn = _connect()
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM locks")
+    count = cur.fetchone()[0]
+    cur.execute("DELETE FROM locks")
+    conn.commit()
+    conn.close()
+    return count
+
+
+def dump_table(table_name: str) -> list[dict]:
+    """Return all rows from *table_name* as a list of dicts."""
+    allowed = {"tickets", "runs", "locks"}
+    if table_name not in allowed:
+        raise ValueError(f"Unknown table: {table_name}")
+    conn = _connect()
+    cur = conn.cursor()
+    cur.execute(f"SELECT * FROM {table_name}")  # noqa: S608 – table name is allow-listed
+    rows = [dict(r) for r in cur.fetchall()]
+    conn.close()
+    return rows
