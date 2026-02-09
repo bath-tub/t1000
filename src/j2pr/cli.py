@@ -514,15 +514,19 @@ def run(
             cap.event("pr_creation_finished", {"pr_url": pr_url})
 
             if config.jira.comment_on_pr and not no_comment:
-                cap.event("jira_comment_posted", {"pr_url": pr_url})
-                add_comment(
-                    config.jira.base_url,
-                    config.jira.email,
-                    config.jira.api_token,
-                    config.jira.api_version,
-                    jira_key,
-                    f"PR opened: {pr_url}",
-                )
+                try:
+                    add_comment(
+                        config.jira.base_url,
+                        config.jira.email,
+                        config.jira.api_token,
+                        config.jira.api_version,
+                        jira_key,
+                        f"PR opened: {pr_url}",
+                    )
+                    cap.event("jira_comment_posted", {"pr_url": pr_url})
+                except Exception as comment_exc:
+                    cap.event("jira_comment_failed", {"error": str(comment_exc)})
+                    console.print(f"[yellow]Warning: Jira comment failed (non-fatal): {comment_exc}[/yellow]")
 
             upsert_ticket(TicketState(jira_key, "PR_OPENED", repo, branch, pr_url, run_id, None))
             finish_run(run_id, "PR_OPENED", pr_url, agent_result.exit_code)
