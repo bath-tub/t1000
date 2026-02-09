@@ -31,9 +31,17 @@ def detect_default_branch(cwd: Path) -> str | None:
 
 
 def fetch_and_checkout_base(cwd: Path, base_branch: str) -> None:
+    """Fetch from all remotes and reset to a pristine copy of the base branch.
+
+    Any uncommitted changes or untracked files left over from a previous agent
+    run are discarded so the new ticket starts from a clean slate.
+    """
     run_command(["git", "fetch", "--all"], cwd=cwd)
-    run_command(["git", "checkout", base_branch], cwd=cwd)
-    run_command(["git", "pull", "--rebase"], cwd=cwd)
+    # Discard any in-progress changes so checkout cannot fail or carry over
+    # stale work from a previous ticket.
+    run_command(["git", "checkout", "--force", base_branch], cwd=cwd)
+    run_command(["git", "reset", "--hard", f"origin/{base_branch}"], cwd=cwd)
+    run_command(["git", "clean", "-fd"], cwd=cwd)
 
 
 def create_branch(cwd: Path, branch: str) -> None:

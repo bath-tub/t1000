@@ -343,8 +343,9 @@ def run(
             commands.extend(
                 [
                     f"git fetch --all",
-                    f"git checkout {base_branch}",
-                    f"git pull --rebase",
+                    f"git checkout --force {base_branch}",
+                    f"git reset --hard origin/{base_branch}",
+                    f"git clean -fd",
                     f"git checkout -B {branch}",
                 ]
             )
