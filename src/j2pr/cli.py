@@ -216,6 +216,8 @@ def run(
     init_db()
     logger = setup_logger()
 
+    jira_key = jira_key.upper()
+
     ticket = get_ticket(jira_key)
     if ticket and ticket.status in {"PR_OPENED", "DONE"} and ticket.pr_url and not rerun:
         console.print(ticket.pr_url)
