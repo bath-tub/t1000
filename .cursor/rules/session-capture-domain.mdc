@@ -1,0 +1,47 @@
+---
+description: Session capture system for recording and diagnosing j2pr runs
+globs: src/j2pr/session_capture.py
+alwaysApply: false
+---
+
+# Session Capture Domain Rules
+
+## Purpose
+Session capture records the full context of every `j2pr run` so AI agents
+and humans can diagnose failures, understand program behaviour, and capture
+context after the fact. It is the primary debugging surface for j2pr.
+
+## Architecture
+- `SessionCapture` is a context manager that tees stdout/stderr and records
+  structured events. It wraps the entire `run()` body in `cli.py`.
+- `session_or_noop()` yields a no-op stub when capture is disabled, so call
+  sites never need conditional logic.
+- `_TeeWriter` mirrors writes to the original stream and a capture file.
+  It must never raise — capture failures are silently swallowed so the real
+  run is never interrupted.
+
+## Key Invariants
+- **Never break the run.** All capture code must be wrapped in try/except.
+  A crash in session capture must not affect the orchestrator pipeline.
+- **Always redact secrets.** Use `_redact_dict` with the configured
+  `redact_patterns` before writing any config, env vars, or event data.
+- **Events are append-only.** Each event is a single JSON line flushed
+  immediately to `session_events.jsonl`. No buffering, no rewriting.
+- **Manifest is written once on close.** It summarises the entire session
+  and must be valid JSON even if the session errored out.
+
+## When Adding New Events
+- Add `cap.event("descriptive_name", {...})` at the decision point in `cli.py`.
+- Use past-tense pairs: `*_started` / `*_finished` for operations with duration.
+- Include actionable data (return codes, file counts, branch names) not just booleans.
+- Keep event names stable — downstream agents and scripts may depend on them.
+
+## Files Per Session (`~/.j2pr/sessions/<ticket>/<run_id>/`)
+- `session_output.log` — raw stdout/stderr tee
+- `session_events.jsonl` — structured events (one JSON object per line)
+- `session_manifest.json` — summary with timing, event list, error array
+
+## Testing
+- The `_NoOpCapture` stub must stay in sync with `SessionCapture`'s public API.
+- If you add a public method to `SessionCapture`, add a no-op version to `_NoOpCapture`.
+- Tee writer tests should verify that capture file failures don't propagate.

@@ -1,0 +1,35 @@
+---
+description: Session capture awareness — diagnosis and maintenance obligations
+globs:
+alwaysApply: true
+---
+
+# Session Capture Observability
+
+j2pr records full session captures for every run when `session_capture.enabled: true`
+in config. These are the primary diagnostic tool for this project.
+
+## When Diagnosing Failures or Unexpected Behaviour
+1. Check if session captures exist: `j2pr sessions --ticket <KEY>` or look
+   in `~/.j2pr/sessions/<ticket>/`.
+2. Read the manifest first: `j2pr session <TICKET> --json` — check the `errors`
+   array and `event_names` to classify the failure.
+3. Walk the event timeline: `j2pr session <TICKET> --events` — reconstructs
+   every decision the orchestrator made, with timestamps and data.
+4. Read raw output if needed: `j2pr session <TICKET> --output` — full console
+   log including agent reasoning and test output.
+5. See the full "Diagnosis Playbook" and "Common Failure Patterns" in `agents.md`.
+
+## When Modifying the Run Pipeline (`cli.py`)
+- The `run()` command wraps its body in `session_or_noop()`. If you add a new
+  step or decision point, emit a `cap.event("descriptive_name", {data})` call.
+- Use `*_started` / `*_finished` pairs for operations with duration.
+- Include actionable data in events (return codes, file counts, branch names).
+- Never let session capture code raise — wrap risky calls so capture failures
+  don't break the real run.
+
+## When Modifying Session Capture (`session_capture.py`)
+- If you add a public method to `SessionCapture`, also add a no-op version
+  to `_NoOpCapture` so disabled mode doesn't break.
+- Events are append-only JSONL — never rewrite past events.
+- Always redact secrets using the configured `redact_patterns`.

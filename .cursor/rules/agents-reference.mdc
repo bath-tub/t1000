@@ -13,3 +13,10 @@ alwaysApply: false
   - the resolution or workaround.
 - If you are working in a specific domain, also update the matching domain rule with any new guidance.
 - Keep entries concise and actionable for future agents.
+
+## Diagnosing Failed Runs
+- When investigating a failed `j2pr run`, check session captures first:
+  `j2pr session <TICKET> --events` for the structured timeline, then
+  `j2pr session <TICKET> --output` for the full raw output.
+- See the "Diagnosis Playbook" in `agents.md` for a step-by-step guide.
+- Cross-reference with run artifacts at `~/.j2pr/runs/<ticket>/<run_id>/`.

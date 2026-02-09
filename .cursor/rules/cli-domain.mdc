@@ -9,4 +9,12 @@ alwaysApply: false
 - Commands live in `src/j2pr/cli.py` and must preserve existing CLI surface area.
 - Use Typer options/args with explicit exit codes: `0` success, `2` needs-human, `3` failed.
 - Outputs should be concise; prefer Rich tables for lists, JSON for `--json`.
-- Keep `scan`, `run`, `run-next`, `status`, `open`, `tail`, `config validate` behavior stable.
+- Keep `scan`, `run`, `run-next`, `status`, `open`, `tail`, `config-validate`, `sessions`, `session` behavior stable.
+
+## Session Capture Integration
+- The `run()` command wraps its body in `session_or_noop()` from `session_capture.py`.
+- Emit `cap.event(...)` calls at every key decision point inside `run()`.
+- The capture context manager must enclose the entire try/except so that errors
+  are recorded before the session closes.
+- `sessions` and `session` commands read from `~/.j2pr/sessions/` — they are
+  read-only and should never mutate state.
