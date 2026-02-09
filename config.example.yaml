@@ -2,6 +2,7 @@ jira:
   base_url: "https://your-domain.atlassian.net"
   email: "you@example.com"
   api_token: "${JIRA_API_TOKEN}"
+  api_version: 3
   jql: 'project = PAYAD AND status = "To Do"'
   fields: ["summary", "description", "status", "components"]
   comment_on_pr: true
@@ -24,6 +25,18 @@ workspace:
   repo_mapping:
     project: "your-repo"
   single_repo_only: true
+  repo_inference:
+    enabled: false
+    min_score: 3
+    max_repos: 0
+    max_files_per_repo: 400
+    max_total_files: 8000
+    max_bytes_per_file: 200000
+    max_tokens: 80
+    max_seconds: 60
+    ignore_dirs: [".git", ".venv", "venv", "node_modules", "dist", "build", ".tox", ".mypy_cache", ".pytest_cache"]
+    ignore_extensions:
+      [".png", ".jpg", ".jpeg", ".gif", ".svg", ".pdf", ".zip", ".gz", ".tgz", ".bz2", ".xz", ".tar", ".7z", ".mp3", ".mp4", ".mov", ".avi", ".wav", ".webm", ".woff", ".woff2", ".ttf", ".otf"]
 
 guardrails:
   deny_globs: [".github/workflows/**", "**/*.tf", "k8s/**", "migrations/**"]
@@ -32,7 +45,7 @@ guardrails:
   max_diff_lines: 2000
   require_clean_worktree: true
   require_tests: true
-  test_command: "pytest"
+  test_command: "auto"   # auto-detects: npm test | ./gradlew test | mvn test
   format_command: ""
   max_fix_attempts: 1
 
@@ -41,3 +54,11 @@ cursor:
   model: ""
   timeout_minutes: 45
   prompt_template_path: ""
+
+session_capture:
+  enabled: false
+  output_dir: "~/.j2pr/sessions"
+  include_config: true
+  include_env: true
+  retention_days: 0            # 0 = keep forever
+  redact_patterns: ["token", "password", "secret", "api_key"]
