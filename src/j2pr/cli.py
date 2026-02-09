@@ -536,6 +536,10 @@ def run(
             clear_lock(repo)
             cap.event("run_succeeded", {"pr_url": pr_url})
             console.print(pr_url)
+        except typer.Exit:
+            # typer.Exit is used for normal control flow (e.g. existing PR
+            # found) — let it propagate without marking the run as failed.
+            raise
         except Exception as exc:
             cap.event("run_failed", {"error": str(exc), "error_type": type(exc).__name__})
             status = _classify_error(str(exc))
