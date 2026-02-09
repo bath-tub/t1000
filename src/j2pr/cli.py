@@ -301,7 +301,7 @@ def run(
     title = str(issue.fields.get("summary", ""))
     description = _extract_description(issue.fields)
     acceptance = _acceptance_from_description(description)
-    branch = f"j2pr/{jira_key}-{_slug(title)[:50]}"
+    branch = f"j2pr/{jira_key}-{_slug(title)[:50]}".rstrip("-")
 
     commands = []
 
@@ -448,8 +448,9 @@ def run(
 
             cap.event("pr_lookup_started")
             if remote_branch_exists(repo_path, branch):
-                pr_url = find_pr_with_gh(branch) if config.github.use_gh_cli else None
-                if not pr_url:
+                if config.github.use_gh_cli:
+                    pr_url = find_pr_with_gh(branch, cwd=repo_path)
+                else:
                     pr_url = find_pr_with_rest(
                         config.github.owner,
                         repo,
@@ -464,8 +465,9 @@ def run(
                     console.print(pr_url)
                     raise typer.Exit(code=0)
 
-            pr_url = find_pr_by_jira_with_gh(jira_key) if config.github.use_gh_cli else None
-            if not pr_url:
+            if config.github.use_gh_cli:
+                pr_url = find_pr_by_jira_with_gh(jira_key, cwd=repo_path)
+            else:
                 pr_url = find_pr_by_jira_with_rest(
                     config.github.owner,
                     repo,
@@ -484,6 +486,8 @@ def run(
             pr_title = f"[{jira_key}] {title}"
             pr_body = _pr_body(agent_result.footer, test_command)
 
+            run_command(["git", "push", "-u", "origin", branch], cwd=repo_path)
+
             if config.github.use_gh_cli:
                 ensure_gh()
                 pr_url = create_pr_with_gh(
@@ -494,9 +498,9 @@ def run(
                     config.github.draft_pr,
                     config.github.reviewers,
                     config.github.labels,
+                    cwd=repo_path,
                 )
             else:
-                run_command(["git", "push", "-u", "origin", branch], cwd=repo_path)
                 pr_url = create_pr_with_rest(
                     config.github.owner,
                     repo,

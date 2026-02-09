@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from pathlib import Path
 from typing import List, Optional
 
 import requests
@@ -20,9 +21,10 @@ def _gh_available() -> bool:
     return result.returncode == 0
 
 
-def find_pr_with_gh(branch: str) -> Optional[str]:
+def find_pr_with_gh(branch: str, cwd: Optional[Path] = None) -> Optional[str]:
     result = run_command(
-        ["gh", "pr", "list", "--state", "open", "--head", branch, "--json", "url"]
+        ["gh", "pr", "list", "--state", "open", "--head", branch, "--json", "url"],
+        cwd=cwd,
     )
     if result.returncode != 0:
         return None
@@ -32,9 +34,10 @@ def find_pr_with_gh(branch: str) -> Optional[str]:
     return None
 
 
-def find_pr_by_jira_with_gh(jira_key: str) -> Optional[str]:
+def find_pr_by_jira_with_gh(jira_key: str, cwd: Optional[Path] = None) -> Optional[str]:
     result = run_command(
-        ["gh", "pr", "list", "--state", "open", "--search", jira_key, "--json", "url"]
+        ["gh", "pr", "list", "--state", "open", "--search", jira_key, "--json", "url"],
+        cwd=cwd,
     )
     if result.returncode != 0:
         return None
@@ -52,6 +55,7 @@ def create_pr_with_gh(
     draft: bool,
     reviewers: List[str],
     labels: List[str],
+    cwd: Optional[Path] = None,
 ) -> str:
     cmd = ["gh", "pr", "create", "--title", title, "--body", body, "--base", base, "--head", head]
     if draft:
@@ -60,7 +64,7 @@ def create_pr_with_gh(
         cmd.extend(["--reviewer", reviewer])
     for label in labels:
         cmd.extend(["--label", label])
-    result = run_command(cmd)
+    result = run_command(cmd, cwd=cwd)
     if result.returncode != 0:
         raise RuntimeError(result.stderr or "gh pr create failed")
     return result.stdout.strip().splitlines()[-1]
